@@ -7,18 +7,14 @@ import { data } from "../config/data";
 // Create a new context
 const AppContext = React.createContext();
 
-// Define the API URL
 
-// Define the initial state of the application
 const initialState = {
-    DefaultLanguage: "english",
     isLoading: true,
-    isSingleLoading: true,
-    searchLoding: true,
-    categoryLoading: true,
+    isSearchLoading: true,
     isError: false,
     recipes: [],
-    singleRecipe: [],
+    searchedRecipe: [],
+    page: "",
   }
 
   // Define the AppProvider component
@@ -28,32 +24,32 @@ const AppProvider = ({ children }) => {
 
 
 
-  //get all particular chapter
-  const fetchRecipe = async (url) => {
+  const fetchRecipe = async () => {
     dispatch({type: "SET_RECIPES_LOADING"})
     try {
-        const response = await axios.get(`https://api.edamam.com/${url}`);
+        const response = await axios.get(`https://api.spoonacular.com/recipes/random?number=50&apiKey=${process.env.REACT_APP_API_KEY}`);
         const data = response.data;
-        console.log(data)
+      
       dispatch({type: "GET_RECIPES", payload: data})
     } catch (error) {
       dispatch({type: "API_ERROR"})
+      window.alert("api error")
     }
   };
 
+  const getSearched = async(query) =>{
+    dispatch({type: "SET_SEARCHED_RECIPES_LOADING"})
+    try{
+      const response = await axios.get(`https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_API_KEY}&tags=${query}&number=50`);
+      const data = response.data.recipes     ;
+      console.log(data)
 
-
-  //get all shlok from particular chapter
-  const fetchByCategory = async (url) => {
-    dispatch({type: "SET_CATEGORY_LOADING"})
-    try {
-      const response = await axios.get(`https://api.edamam.com/${url}`);
-      const data = response.data;
-      dispatch({type: "GET_RECIPES_CATEGORY", payload: data})
-    } catch (error) {
-      dispatch({type: "SET_CATEGORY_ERROR"})
+      dispatch({type: "GET_SEARCHED_RECIPES", payload: data})
+    }catch(error){
+      dispatch({type: "API_ERROR"})
     }
-  };
+  }
+
 
   useEffect(()=>{
     fetchRecipe()
@@ -61,7 +57,7 @@ const AppProvider = ({ children }) => {
 
 
 
-  return <AppContext.Provider value={{...state,fetchRecipe, fetchByCategory}} >
+  return <AppContext.Provider value={{...state,fetchRecipe, getSearched}} >
   {children}
   </AppContext.Provider>;
 };

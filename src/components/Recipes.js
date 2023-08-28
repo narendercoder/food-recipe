@@ -1,61 +1,78 @@
-import React, { useCallback, useEffect, useState } from "react";
-import Card from "../components/Card";
+import React, { useEffect, useState } from "react";
+import Card from "./Card";
 import { styled } from "styled-components";
-// import { data } from "../config/data";
-import CustomPagination from "../components/CustomPagination";
-import { BiSearch } from "react-icons/bi";
+import CustomPagination from "./CustomPagination";
 import { healthLabels } from "../config/categories";
 import { useGlobalContext } from "../context/Context";
+import Search from "./Search";
 
 const Recipes = () => {
+  const { isLoading, recipes} = useGlobalContext();
   const [page, setPage] = useState(1);
-  const [searchTerm, setSearchedTerm] = useState("");
-  const [query, setQuery] = useState("vegan");
   const [numOfPages, setNumOfPages] = useState();
-  const [category, setCategory] = useState("alcohol-free");
-
-  const { isLoading, recipes, fetchRecipe, fetchByCategory } = useGlobalContext();
-
+  const [category, setCategory] = useState("all");
+  const [filteredData, setFilteredData] = useState([]);
 
   const selectCategoryhandler = (e) => {
     setCategory(e.target.value);
+     filteredCategoryData(e.target.value);
   };
 
-  const searchhandler = useCallback((searchQuery) => {
-    setQuery(searchQuery);
-  }, []);
+  const filteredCategoryData = (category) =>{
+    if(filteredData.length !== 0){
+      if(category === "all"){
+        return setFilteredData(recipes);
+      }
+      else if(category === "dairy free") {
+        let filtered = recipes.recipes?.filter((item) => {
+          return item.dairyFree === true
+        });
+       return setFilteredData(filtered);
+      }
+      else if(category === "vegetarian") {
+        let filtered = recipes.recipes.filter((item) => {
+          return item.vegetarian === true
+        });
+       return setFilteredData(filtered);
+      }
+      else if(category === "gluten free") {
+        let filtered = recipes.recipes.filter((item) => {
+          return item.glutenFree === true
+        });
+        
+       return setFilteredData(filtered);
+      }
+      else if(category === "vegan") {
+        let filtered = recipes.recipes.filter((item) => {
+          return item.vegan === true
+        })
+        return setFilteredData(filtered);
+      }
+    }
+
+  }
+
+  console.log(filteredData)
 
 
-  useEffect(()=>{
-    fetchRecipe(`search?q=${query}&app_id=${process.env.REACT_APP_ID}&app_key=${process.env.REACT_APP_API_KEY}&from=${0}&to=${100}`)
-  }, [query])
+ useEffect(()=>{
+   setFilteredData(recipes);
+ }, [recipes])
 
-  useEffect(()=>{
-    fetchByCategory(`search?q=${query}&app_id=${process.env.REACT_APP_ID}&app_key=${process.env.REACT_APP_API_KEY}&from=${0}&to=${100}&health=${category}`)
-  }, [category, query])
 
   useEffect(() => {
-    setNumOfPages(recipes.to);
-  }, [page, recipes]);
+    if(filteredData.length !== 0)  {
+
+      category === "all"   ? setNumOfPages(filteredData.recipes.length) : setNumOfPages(filteredData.length)
+
+     }
+  }, [page, category, filteredData]);
 
   return (
     <Wrapper className="relative recipes mt-5">
       <div className="custom-container w-full h-full flex justify-center items-center flex-col">
         <div className="cooked-recipe-search flex flex-wrap justify-between items-center w-full">
-          <div className="flex justify-between md:justify-center items-center md:w-3/4 w-full">
-            <input
-              type="text"
-              onChange={(e) => setSearchedTerm(e.target.value)}
-              className=" border border-solid w-full"
-              value={searchTerm}
-            />
-            <button
-              className="search-btn flex justify-center items-center text-xl"
-              onClick={() => searchhandler(searchTerm)}
-            >
-              <BiSearch />
-            </button>
-          </div>
+          <Search />
           <div className="category w-full md:w-1/6 mt-3 md:mt-0">
             <select
               className="options cursor-pointer"
@@ -77,17 +94,25 @@ const Recipes = () => {
           </div>
         </div>
         <div className="relative my-5 flex flex-wrap w-full h-full justify-between">
-          {
-            !isLoading ? (
-            Object.keys(recipes).length !== 0 ? (
-              recipes.hits.slice(page * 9 - 9, page * 9).map((item) => {
-                return <Card key={item.recipe.label} recipe={item.recipe} />;
+          {!isLoading ? (
+            filteredData.length !== 0 ? (
+             category != "all" ? (
+              filteredData.slice(page * 9 - 9, page * 9).map((item) => {
+                return <Card key={item.id} recipe={item} />;
               })
+             ) : (
+              filteredData.recipes.slice(page * 9 - 9, page * 9).map((item) => {
+                return <Card key={item.id} recipe={item} />;
+              })
+             )
             ) : (
               <></>
             )
           ) : (
-            <div className="w-full h-56 flex justify-center items-center text-center text-xl py-10"> Loading Recipes...</div>
+            <div className="w-full h-56 flex justify-center items-center text-center text-xl py-10">
+              {" "}
+              Loading Recipes...
+            </div>
           )}
         </div>
         {numOfPages > 1 && numOfPages <= 100 && (

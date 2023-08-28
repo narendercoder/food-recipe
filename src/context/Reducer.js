@@ -22,24 +22,21 @@ const reducer = (state, action) => {
         recipes: action.payload,
         isLoading: false,
       };
+
+      case "SET_SEARCHED_RECIPES_LOADING":
+      return {
+        ...state,
+        isSearchLoading: true,
+      };
+    case "GET_SEARCHED_RECIPES":
+      return {
+        ...state,
+        searchedRecipe: action.payload,
+        isSearchLoading: false,
+      };
       
-    case "SET_CATEGORY_LOADING":
-      return {
-        ...state,
-        isLoading: true,
-      };
-    case "GET_RECIPES_CATEGORY":
-      return {
-        ...state,
-        isLoading: false,
-        recipes: action.payload,
-      };
-    case "SET_CATEGORY_ERROR":
-      return {
-        ...state,
-        isLoading: true,
-        isError: true,
-      };
+      
+   
 
 
     default:

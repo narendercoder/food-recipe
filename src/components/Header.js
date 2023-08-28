@@ -23,11 +23,11 @@ const Header = () => {
                 About Us
               </NavLink>
             </li>
-            <li className="navbar-item text-xl font-semibold">
+            {/* <li className="navbar-item text-xl font-semibold">
               <NavLink to="/recipes" className="navbar-link">
                 Recipes
               </NavLink>
-            </li>
+            </li> */}
           </ul>
         </div>
       </div>
