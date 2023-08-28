@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import Recipe from './components/Recipe';
 import About from './pages/About';
 import Searched from './components/Searched';
+import ErrorPage from './components/ErrorPage';
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
        <Route path="/searched/:id" element={<Searched/>} />
        <Route path="/about" element={<About/>} />
        <Route path="/recipe" element={<Recipe/>} />
+       <Route path="*" element={<ErrorPage/>} />
       </Routes>
       <Footer/>
     </>
